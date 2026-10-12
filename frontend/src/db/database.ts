@@ -3,8 +3,8 @@ import Dexie, { type Table } from 'dexie'
 export interface Observation {
   id?: number
   speciesName: string
+  scientificName: string
   notes: string
-  observationDate: string
   observationAt: string
   recordedAt: string
   latitude: number | null
@@ -19,7 +19,7 @@ export class VasudhaDatabase extends Dexie {
     super('VasudhaDatabase')
 
     this.version(1).stores({
-      observations: '++id, speciesName, observationDate',
+      observations: '++id, speciesName',
     })
   }
 }

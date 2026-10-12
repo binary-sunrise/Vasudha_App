@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react'
+const formatDateTime = (value: string) => {
+  return new Date(value).toLocaleString('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+}
 
 interface Observation {
   id?: number
   speciesName: string
+  scientificName: string
   notes: string
-  observationDate: string
   observationAt: string
   recordedAt: string
   latitude: number | null
@@ -38,21 +44,23 @@ function ObservationCard({ observation }: ObservationCardProps) {
       <p>
         <strong>Species:</strong> {observation.speciesName}
       </p>
+      {observation.scientificName && (
+        <p className="text-sm text-gray-600">
+          <strong>Scientific Name:</strong>{' '}
+          <span className="italic">{observation.scientificName}</span>
+        </p>
+      )}
 
       <p>
         <strong>Notes:</strong> {observation.notes}
       </p>
 
       <p>
-        <strong>Date:</strong> {observation.observationDate}
+        <strong>Observed:</strong> {formatDateTime(observation.observationAt)}
       </p>
 
       <p>
-        <strong>Observed:</strong> {observation.observationAt}
-      </p>
-
-      <p>
-        <strong>Recorded:</strong> {observation.recordedAt}
+        <strong>Recorded:</strong> {formatDateTime(observation.recordedAt)}
       </p>
 
       <p>
