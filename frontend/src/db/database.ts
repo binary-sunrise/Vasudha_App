@@ -4,12 +4,14 @@ export interface Observation {
   id?: number
   speciesName: string
   scientificName: string
+  identificationStatus?: 'Identified' | 'Unknown' | 'Needs verification'
   notes: string
   observationAt: string
   recordedAt: string
   latitude: number | null
   longitude: number | null
-  photo: Blob | null
+  photo?: Blob | null
+  photos?: Blob[]
 }
 
 export class VasudhaDatabase extends Dexie {
