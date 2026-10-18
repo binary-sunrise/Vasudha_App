@@ -3,10 +3,29 @@ import { Button } from '@/components/ui/button'
 import { db, type Observation, type IdentificationStatus } from '@/db/database'
 import ObservationCard from '@/components/ObservationCard'
 
+export const SPECIES_GROUPS = [
+  'Mammals',
+  'Birds',
+  'Reptiles',
+  'Amphibians',
+  'Fish',
+  'Insects',
+  'Arachnids',
+  'Crustaceans',
+  'Molluscs',
+  'Plants',
+  'Fungi',
+  'Algae',
+  'Arthropods',
+  'Other',
+  'Unknown',
+] as const
+
 function Home() {
   // Session & Form state
   const [started, setStarted] = useState(false)
   const [speciesName, setSpeciesName] = useState('')
+  const [speciesGroups, setSpeciesGroups] = useState('')
   const [scientificName, setScientificName] = useState('')
   const [identificationStatus, setIdentificationStatus] = useState<IdentificationStatus | ''>('')
   const [notes, setNotes] = useState('')
@@ -73,6 +92,7 @@ function Home() {
   // Reset form inputs and locks back to an empty initial state
   const resetForm = () => {
     setSpeciesName('')
+    setSpeciesGroups('')
     setScientificName('')
     setIdentificationStatus('')
     setNotes('')
@@ -203,7 +223,7 @@ function Home() {
         <h2 className="text-2xl font-bold">Welcome to Vasudha</h2>
         <p className="mt-2 text-gray-600">Biodiversity Field Data Collection</p>
         <Button
-          className="mt-6 w-full"
+          className="mt-6 min-h-11 w-full text-base"
           onClick={() => {
             setStarted(true)
             resetForm()
@@ -230,7 +250,7 @@ function Home() {
               disabled={saved || isUnknown}
               onChange={(e) => setSpeciesName(e.target.value)}
               placeholder="Example: Indian Peafowl"
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              className="mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -275,7 +295,7 @@ function Home() {
               disabled={saved || isUnknown}
               onChange={(e) => setScientificName(e.target.value)}
               placeholder="e.g. Elephas maximus"
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              className="mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -291,7 +311,7 @@ function Home() {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any details about the observation..."
               rows={4}
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              className="mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -300,7 +320,7 @@ function Home() {
             <label className="text-sm font-medium">Location</label>
             <Button
               type="button"
-              className="mt-2 w-full"
+              className="mt-2 min-h-11 w-full"
               disabled={saved || isGettingLocation}
               onClick={getLocation}
             >
@@ -399,7 +419,7 @@ function Home() {
                       <button
                         type="button"
                         onClick={() => handleRemovePhoto(idx)}
-                        className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700 active:scale-95"
+                        className="absolute top-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700 active:scale-95"
                         title="Remove photo"
                       >
                         ✕
@@ -414,7 +434,7 @@ function Home() {
           {/* Save Action Button */}
           <Button
             type="button"
-            className="mt-6 w-full"
+            className="mt-6 min-h-11 w-full text-base"
             disabled={saved || isSaving}
             onClick={handleSaveObservation}
           >
@@ -432,7 +452,7 @@ function Home() {
               </p>
               <Button
                 type="button"
-                className="mt-3 w-full"
+                className="mt-3 min-h-11 w-full text-base"
                 onClick={resetForm}
               >
                 + New Observation
@@ -452,7 +472,7 @@ function Home() {
         </div>
 
         {observations.length > 0 ? (
-          <div className="mt-4 space-y-6">
+          <div className="mt-4 space-y-4">
             {observations.map((observation) => (
               <ObservationCard
                 key={observation.id}
