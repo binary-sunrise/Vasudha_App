@@ -25,6 +25,7 @@ interface Observation {
   speciesName?: string
   scientificName?: string
   speciesGroups?: string
+  otherSpeciesGroup?: string
   identificationStatus?: 'Identified' | 'Unknown' | 'Needs verification'
   notes?: string
   observationAt?: string
@@ -37,9 +38,10 @@ interface Observation {
 
 interface ObservationCardProps {
   observation: Observation
+  onDelete?: (id: number) => void
 }
 
-function ObservationCard({ observation }: ObservationCardProps) {
+function ObservationCard({ observation, onDelete }: ObservationCardProps) {
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
 
   useEffect(() => {
@@ -65,10 +67,15 @@ function ObservationCard({ observation }: ObservationCardProps) {
     }
   }, [observation.photos, observation.photo])
 
+  const displaySpeciesGroup =
+    observation.speciesGroups === 'Other' && observation.otherSpeciesGroup?.trim()
+      ? `Other (${observation.otherSpeciesGroup.trim()})`
+      : observation.speciesGroups
+
   return (
     <div className="rounded-lg border p-4">
-      {(observation.identificationStatus || observation.speciesGroups) && (
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {observation.identificationStatus === 'Identified' && (
             <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
               Identified
@@ -84,13 +91,24 @@ function ObservationCard({ observation }: ObservationCardProps) {
               Needs verification
             </span>
           )}
-          {observation.speciesGroups?.trim() && (
-            <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
-              {observation.speciesGroups}
-            </span>
-          )}
         </div>
-      )}
+
+        {onDelete && observation.id !== undefined && (
+          <button
+            type="button"
+            onClick={() => {
+              const label = observation.speciesName?.trim() || 'this observation'
+              if (window.confirm(`Are you sure you want to delete ${label}?`)) {
+                onDelete(observation.id!)
+              }
+            }}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 active:scale-95"
+            title="Delete observation"
+          >
+            🗑️ Delete
+          </button>
+        )}
+      </div>
 
       {observation.identificationStatus === 'Unknown' ? (
         <p>
@@ -110,9 +128,9 @@ function ObservationCard({ observation }: ObservationCardProps) {
         </p>
       )}
 
-      {observation.speciesGroups?.trim() && (
+      {displaySpeciesGroup?.trim() && (
         <p className="text-sm text-gray-600">
-          <strong>Species Group:</strong> {observation.speciesGroups}
+          <strong>Species Group:</strong> {displaySpeciesGroup}
         </p>
       )}
 

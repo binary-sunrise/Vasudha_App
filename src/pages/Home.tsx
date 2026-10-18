@@ -25,6 +25,7 @@ function Home() {
   const [started, setStarted] = useState(false)
   const [speciesName, setSpeciesName] = useState('')
   const [speciesGroups, setSpeciesGroups] = useState('')
+  const [otherSpeciesGroup, setOtherSpeciesGroup] = useState('')
   const [scientificName, setScientificName] = useState('')
 
   const [identificationStatus, setIdentificationStatus] = useState<
@@ -61,6 +62,7 @@ function Home() {
     speciesName: string
     scientificName: string
     speciesGroups?: string
+    otherSpeciesGroup?: string
     identificationStatus?: 'Identified' | 'Unknown' | 'Needs verification'
     notes: string
     observationAt: string
@@ -83,6 +85,15 @@ function Home() {
 
     loadObservations()
   }, [])
+
+  const handleDeleteObservation = async (id: number) => {
+    try {
+      await db.observations.delete(id)
+      setObservations((current) => current.filter((obs) => obs.id !== id))
+    } catch (error) {
+      alert(`Failed to delete observation: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
 
   const getLocation = () => {
     setIsGettingLocation(true)
@@ -112,6 +123,7 @@ function Home() {
   const resetForm = () => {
     setSpeciesName('')
     setSpeciesGroups('')
+    setOtherSpeciesGroup('')
     setScientificName('')
     setIdentificationStatus('')
     setNotes('')
@@ -199,11 +211,12 @@ function Home() {
               id="speciesGroups"
               value={speciesGroups}
               disabled={saved}
-
-
-
-              onChange={(e) => setSpeciesGroups(e.target.value)}
-
+              onChange={(e) => {
+                setSpeciesGroups(e.target.value)
+                if (e.target.value !== 'Other') {
+                  setOtherSpeciesGroup('')
+                }
+              }}
               className={`mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${!speciesGroups ? 'text-gray-500' : 'text-gray-900'
                 }`}
             >
@@ -216,6 +229,26 @@ function Home() {
                 </option>
               ))}
             </select>
+
+            {speciesGroups === 'Other' && (
+              <div className="mt-3">
+                <label
+                  htmlFor="otherSpeciesGroup"
+                  className="text-sm font-medium"
+                >
+                  Specify Other Group
+                </label>
+                <input
+                  id="otherSpeciesGroup"
+                  type="text"
+                  value={otherSpeciesGroup}
+                  disabled={saved}
+                  onChange={(event) => setOtherSpeciesGroup(event.target.value)}
+                  placeholder="e.g. Lichens, Bryophytes, Bacteria"
+                  className="mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                />
+              </div>
+            )}
           </div>
 
 
@@ -426,6 +459,11 @@ function Home() {
                 return
               }
 
+              if (speciesGroups === 'Other' && !otherSpeciesGroup.trim()) {
+                alert('Please specify the other species group.')
+                return
+              }
+
               if (!identificationStatus) {
                 alert('Please select an identification status.')
                 return
@@ -478,11 +516,17 @@ function Home() {
 
               setIsSaving(true)
 
+              const finalOtherSpeciesGroup =
+                speciesGroups === 'Other' && otherSpeciesGroup.trim()
+                  ? otherSpeciesGroup.trim()
+                  : undefined
+
               try {
                 const id = await db.observations.add({
                   speciesName,
                   scientificName,
                   speciesGroups,
+                  otherSpeciesGroup: finalOtherSpeciesGroup,
                   identificationStatus,
                   notes,
                   observationAt,
@@ -499,6 +543,7 @@ function Home() {
                     speciesName,
                     scientificName,
                     speciesGroups,
+                    otherSpeciesGroup: finalOtherSpeciesGroup,
                     identificationStatus,
                     notes,
                     observationAt,
@@ -559,6 +604,7 @@ function Home() {
               <ObservationCard
                 key={observation.id}
                 observation={observation}
+                onDelete={handleDeleteObservation}
               />
             ))}
           </div>
