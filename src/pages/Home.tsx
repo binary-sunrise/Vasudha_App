@@ -3,9 +3,28 @@ import { Button } from '@/components/ui/button'
 import { db } from '@/db/database'
 import ObservationCard from '@/components/ObservationCard'
 
+export const SPECIES_GROUPS = [
+  'Mammals',
+  'Birds',
+  'Reptiles',
+  'Amphibians',
+  'Fish',
+  'Insects',
+  'Arachnids',
+  'Crustaceans',
+  'Molluscs',
+  'Plants',
+  'Fungi',
+  'Algae',
+  'Arthropods',
+  'Other',
+  'Unknown',
+] as const
+
 function Home() {
   const [started, setStarted] = useState(false)
   const [speciesName, setSpeciesName] = useState('')
+  const [speciesGroups, setSpeciesGroups] = useState('')
   const [scientificName, setScientificName] = useState('')
 
   const [identificationStatus, setIdentificationStatus] = useState<
@@ -41,6 +60,7 @@ function Home() {
     id?: number
     speciesName: string
     scientificName: string
+    speciesGroups?: string
     identificationStatus?: 'Identified' | 'Unknown' | 'Needs verification'
     notes: string
     observationAt: string
@@ -91,6 +111,7 @@ function Home() {
 
   const resetForm = () => {
     setSpeciesName('')
+    setSpeciesGroups('')
     setScientificName('')
     setIdentificationStatus('')
     setNotes('')
@@ -124,7 +145,7 @@ function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-md p-6">
+    <main className="mx-auto max-w-md px-4 py-6 sm:px-6">
       <section className="text-center">
         <h2 className="text-2xl font-bold">
           Welcome to Vasudha
@@ -135,7 +156,7 @@ function Home() {
         </p>
 
         <Button
-          className="mt-6 w-full"
+          className="mt-6 min-h-11 w-full text-base"
           onClick={() => {
             setStarted(true)
             resetForm()
@@ -146,7 +167,7 @@ function Home() {
       </section>
 
       {started && (
-        <section className="mt-8 rounded-xl border p-5">
+        <section className="mt-6 rounded-xl border p-4 sm:p-5">
           <h3 className="text-lg font-semibold">
             New Observation
           </h3>
@@ -166,12 +187,39 @@ function Home() {
               disabled={saved || identificationStatus === 'Unknown'}
               onChange={(event) => setSpeciesName(event.target.value)}
               placeholder="Example: Indian Peafowl"
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              className="mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
+          <div className="mt-5">
+            <label htmlFor="speciesGroups" className="mb-1 block text-sm font-medium">
+              Species Groups
+            </label>
+            <select
+              id="speciesGroups"
+              value={speciesGroups}
+              disabled={saved}
 
-          <div>
+
+
+              onChange={(e) => setSpeciesGroups(e.target.value)}
+
+              className={`mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${!speciesGroups ? 'text-gray-500' : 'text-gray-900'
+                }`}
+            >
+              <option value="" disabled>
+                Select Species Group...
+              </option>
+              {SPECIES_GROUPS.map((group) => (
+                <option key={group} value={group} className="text-gray-900">
+                  {group}
+                </option>
+              ))}
+            </select>
+          </div>
+
+
+          <div className="mt-5">
             <label htmlFor="identificationStatus" className="mb-1 block text-sm font-medium">
               Identification Status
             </label>
@@ -196,7 +244,7 @@ function Home() {
                 }
               }}
 
-              className={`mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${!identificationStatus ? 'text-gray-500' : 'text-gray-900'
+              className={`mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${!identificationStatus ? 'text-gray-500' : 'text-gray-900'
                 }`}
             >
               <option value="" disabled>
@@ -230,7 +278,7 @@ function Home() {
               disabled={saved || identificationStatus === 'Unknown'}
               onChange={(event) => setScientificName(event.target.value)}
               placeholder="e.g. Elephas maximus"
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              className="mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -248,7 +296,7 @@ function Home() {
               onChange={(event) => setNotes(event.target.value)}
               placeholder="Add any details about the observation..."
               rows={4}
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              className="mt-2 w-full rounded-lg border px-3 py-2.5 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -259,7 +307,7 @@ function Home() {
 
             <Button
               type="button"
-              className="mt-2 w-full"
+              className="mt-2 min-h-11 w-full"
               disabled={saved || isGettingLocation}
               onClick={getLocation}
             >
@@ -296,22 +344,20 @@ function Home() {
             <div className="mt-2 grid grid-cols-2 gap-2">
               <label
                 htmlFor={saved ? undefined : "camera-photo-input"}
-                className={`flex items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium ${
-                  saved
-                    ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-60'
-                    : 'cursor-pointer hover:bg-gray-50 active:bg-gray-100'
-                }`}
+                className={`flex min-h-11 items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium ${saved
+                  ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-60'
+                  : 'cursor-pointer hover:bg-gray-50 active:bg-gray-100'
+                  }`}
               >
                 📷 Take Photo
               </label>
 
               <label
                 htmlFor={saved ? undefined : "gallery-photo-input"}
-                className={`flex items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium ${
-                  saved
-                    ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-60'
-                    : 'cursor-pointer hover:bg-gray-50 active:bg-gray-100'
-                }`}
+                className={`flex min-h-11 items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium ${saved
+                  ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-60'
+                  : 'cursor-pointer hover:bg-gray-50 active:bg-gray-100'
+                  }`}
               >
                 🖼️ Upload from Gallery
               </label>
@@ -356,7 +402,7 @@ function Home() {
                       <button
                         type="button"
                         onClick={() => handleRemovePhoto(idx)}
-                        className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700 active:scale-95"
+                        className="absolute top-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700 active:scale-95"
                         title="Remove photo"
                       >
                         ✕
@@ -370,10 +416,15 @@ function Home() {
 
           <Button
             type="button"
-            className="mt-6 w-full"
+            className="mt-6 min-h-11 w-full text-base"
             disabled={saved || isSaving}
             onClick={async () => {
               if (saved || isSaving) return
+
+              if (!speciesGroups) {
+                alert('Please select a species group.')
+                return
+              }
 
               if (!identificationStatus) {
                 alert('Please select an identification status.')
@@ -431,6 +482,7 @@ function Home() {
                 const id = await db.observations.add({
                   speciesName,
                   scientificName,
+                  speciesGroups,
                   identificationStatus,
                   notes,
                   observationAt,
@@ -446,6 +498,7 @@ function Home() {
                     id,
                     speciesName,
                     scientificName,
+                    speciesGroups,
                     identificationStatus,
                     notes,
                     observationAt,
@@ -479,7 +532,7 @@ function Home() {
               </p>
               <Button
                 type="button"
-                className="mt-3 w-full"
+                className="mt-3 min-h-11 w-full text-base"
                 onClick={resetForm}
               >
                 + New Observation
@@ -490,7 +543,7 @@ function Home() {
         </section>
       )}
 
-      <section className="mt-8 rounded-xl border p-5">
+      <section className="mt-6 rounded-xl border p-4 sm:p-5">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">
             My Observations
@@ -501,7 +554,7 @@ function Home() {
         </div>
 
         {observations.length > 0 ? (
-          <div className="mt-4 space-y-6">
+          <div className="mt-4 space-y-4">
             {observations.map((observation) => (
               <ObservationCard
                 key={observation.id}

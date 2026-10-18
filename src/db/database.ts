@@ -4,6 +4,7 @@ export interface Observation {
   id?: number
   speciesName: string
   scientificName: string
+  speciesGroups?: string
   identificationStatus?: 'Identified' | 'Unknown' | 'Needs verification'
   notes: string
   observationAt: string

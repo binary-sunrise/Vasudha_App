@@ -24,6 +24,7 @@ interface Observation {
   id?: number
   speciesName?: string
   scientificName?: string
+  speciesGroups?: string
   identificationStatus?: 'Identified' | 'Unknown' | 'Needs verification'
   notes?: string
   observationAt?: string
@@ -66,8 +67,8 @@ function ObservationCard({ observation }: ObservationCardProps) {
 
   return (
     <div className="rounded-lg border p-4">
-      {observation.identificationStatus && (
-        <div className="mb-2">
+      {(observation.identificationStatus || observation.speciesGroups) && (
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
           {observation.identificationStatus === 'Identified' && (
             <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
               Identified
@@ -81,6 +82,11 @@ function ObservationCard({ observation }: ObservationCardProps) {
           {observation.identificationStatus === 'Needs verification' && (
             <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
               Needs verification
+            </span>
+          )}
+          {observation.speciesGroups?.trim() && (
+            <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+              {observation.speciesGroups}
             </span>
           )}
         </div>
@@ -101,6 +107,12 @@ function ObservationCard({ observation }: ObservationCardProps) {
         <p className="text-sm text-gray-600">
           <strong>Scientific Name:</strong>{' '}
           <span className="italic">{observation.scientificName}</span>
+        </p>
+      )}
+
+      {observation.speciesGroups?.trim() && (
+        <p className="text-sm text-gray-600">
+          <strong>Species Group:</strong> {observation.speciesGroups}
         </p>
       )}
 
