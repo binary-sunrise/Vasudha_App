@@ -26,6 +26,7 @@ function Home() {
   const [started, setStarted] = useState(false)
   const [speciesName, setSpeciesName] = useState('')
   const [speciesGroups, setSpeciesGroups] = useState('')
+  const [otherSpeciesGroup, setOtherSpeciesGroup] = useState('')
   const [scientificName, setScientificName] = useState('')
   const [identificationStatus, setIdentificationStatus] = useState<IdentificationStatus | ''>('')
   const [notes, setNotes] = useState('')
@@ -93,6 +94,7 @@ function Home() {
   const resetForm = () => {
     setSpeciesName('')
     setSpeciesGroups('')
+    setOtherSpeciesGroup('')
     setScientificName('')
     setIdentificationStatus('')
     setNotes('')
@@ -477,6 +479,7 @@ function Home() {
               <ObservationCard
                 key={observation.id}
                 observation={observation}
+                onDelete={handleDeleteObservation}
               />
             ))}
           </div>

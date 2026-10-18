@@ -26,6 +26,7 @@ const STATUS_STYLES: Record<IdentificationStatus, string> = {
 
 interface ObservationCardProps {
   observation: Observation
+  onDelete?: (id: number) => void
 }
 
 function ObservationCard({ observation }: ObservationCardProps) {
@@ -47,6 +48,11 @@ function ObservationCard({ observation }: ObservationCardProps) {
 
   const statusStyle = observation.identificationStatus ? STATUS_STYLES[observation.identificationStatus] : null
 
+  const displaySpeciesGroup =
+    observation.speciesGroups === 'Other' && observation.otherSpeciesGroup?.trim()
+      ? `Other (${observation.otherSpeciesGroup.trim()})`
+      : observation.speciesGroups
+
   return (
     <div className="rounded-lg border p-4">
       {/* Verification status badge */}
@@ -56,7 +62,23 @@ function ObservationCard({ observation }: ObservationCardProps) {
             {observation.identificationStatus}
           </span>
         </div>
-      )}
+
+        {onDelete && observation.id !== undefined && (
+          <button
+            type="button"
+            onClick={() => {
+              const label = observation.speciesName?.trim() || 'this observation'
+              if (window.confirm(`Are you sure you want to delete ${label}?`)) {
+                onDelete(observation.id!)
+              }
+            }}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 active:scale-95"
+            title="Delete observation"
+          >
+            🗑️ Delete
+          </button>
+        )}
+      </div>
 
       {/* Common species name (displays 'Unknown species' fallback when unidentified) */}
       {observation.identificationStatus === 'Unknown' ? (
