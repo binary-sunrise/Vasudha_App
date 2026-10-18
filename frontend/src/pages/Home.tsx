@@ -36,6 +36,7 @@ function Home() {
     }
   }, [photos])
   const [saved, setSaved] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [observations, setObservations] = useState<{
     id?: number
     speciesName: string
@@ -98,11 +99,12 @@ function Home() {
     setPhotos([])
     setPhotoCapturedAt(null)
     setIsGettingLocation(false)
+    setIsSaving(false)
     setSaved(false)
   }
 
   const handleAddPhotos = (fileList: FileList | null) => {
-    if (!fileList || fileList.length === 0) return
+    if (saved || !fileList || fileList.length === 0) return
     const newFiles = Array.from(fileList)
     setPhotos((prev) => [...prev, ...newFiles])
     if (!photoCapturedAt) {
@@ -111,6 +113,7 @@ function Home() {
   }
 
   const handleRemovePhoto = (indexToRemove: number) => {
+    if (saved) return
     setPhotos((prev) => {
       const updated = prev.filter((_, idx) => idx !== indexToRemove)
       if (updated.length === 0) {
@@ -160,10 +163,10 @@ function Home() {
               id="speciesName"
               type="text"
               value={speciesName}
-              disabled={identificationStatus === 'Unknown'}
+              disabled={saved || identificationStatus === 'Unknown'}
               onChange={(event) => setSpeciesName(event.target.value)}
               placeholder="Example: Indian Peafowl"
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2"
+              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -175,6 +178,7 @@ function Home() {
             <select
               id="identificationStatus"
               value={identificationStatus}
+              disabled={saved}
 
 
               onChange={(e) => {
@@ -192,7 +196,7 @@ function Home() {
                 }
               }}
 
-              className={`mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 ${!identificationStatus ? 'text-gray-500' : 'text-gray-900'
+              className={`mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${!identificationStatus ? 'text-gray-500' : 'text-gray-900'
                 }`}
             >
               <option value="" disabled>
@@ -223,10 +227,10 @@ function Home() {
               id="scientificName"
               type="text"
               value={scientificName}
-              disabled={identificationStatus === 'Unknown'}
+              disabled={saved || identificationStatus === 'Unknown'}
               onChange={(event) => setScientificName(event.target.value)}
               placeholder="e.g. Elephas maximus"
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2"
+              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -240,10 +244,11 @@ function Home() {
             <textarea
               id="notes"
               value={notes}
+              disabled={saved}
               onChange={(event) => setNotes(event.target.value)}
               placeholder="Add any details about the observation..."
               rows={4}
-              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2"
+              className="mt-2 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
             />
           </div>
 
@@ -255,7 +260,7 @@ function Home() {
             <Button
               type="button"
               className="mt-2 w-full"
-              disabled={isGettingLocation}
+              disabled={saved || isGettingLocation}
               onClick={getLocation}
             >
               {isGettingLocation
@@ -290,15 +295,23 @@ function Home() {
 
             <div className="mt-2 grid grid-cols-2 gap-2">
               <label
-                htmlFor="camera-photo-input"
-                className="flex cursor-pointer items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium hover:bg-gray-50 active:bg-gray-100"
+                htmlFor={saved ? undefined : "camera-photo-input"}
+                className={`flex items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium ${
+                  saved
+                    ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-60'
+                    : 'cursor-pointer hover:bg-gray-50 active:bg-gray-100'
+                }`}
               >
                 📷 Take Photo
               </label>
 
               <label
-                htmlFor="gallery-photo-input"
-                className="flex cursor-pointer items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium hover:bg-gray-50 active:bg-gray-100"
+                htmlFor={saved ? undefined : "gallery-photo-input"}
+                className={`flex items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm font-medium ${
+                  saved
+                    ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-60'
+                    : 'cursor-pointer hover:bg-gray-50 active:bg-gray-100'
+                }`}
               >
                 🖼️ Upload from Gallery
               </label>
@@ -309,6 +322,7 @@ function Home() {
               type="file"
               accept="image/*"
               capture="environment"
+              disabled={saved}
               className="hidden"
               onChange={(event) => {
                 handleAddPhotos(event.target.files)
@@ -321,6 +335,7 @@ function Home() {
               type="file"
               accept="image/*"
               multiple
+              disabled={saved}
               className="hidden"
               onChange={(event) => {
                 handleAddPhotos(event.target.files)
@@ -337,14 +352,16 @@ function Home() {
                       alt={`Photo preview ${idx + 1}`}
                       className="aspect-square w-full object-cover"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemovePhoto(idx)}
-                      className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700 active:scale-95"
-                      title="Remove photo"
-                    >
-                      ✕
-                    </button>
+                    {!saved && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePhoto(idx)}
+                        className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700 active:scale-95"
+                        title="Remove photo"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -354,8 +371,10 @@ function Home() {
           <Button
             type="button"
             className="mt-6 w-full"
-            disabled={saved}
+            disabled={saved || isSaving}
             onClick={async () => {
+              if (saved || isSaving) return
+
               if (!identificationStatus) {
                 alert('Please select an identification status.')
                 return
@@ -406,22 +425,10 @@ function Home() {
                 return
               }
 
-              const id = await db.observations.add({
-                speciesName,
-                scientificName,
-                identificationStatus,
-                notes,
-                observationAt,
-                recordedAt,
-                latitude: location.latitude,
-                longitude: location.longitude,
-                photo: photos[0] ?? null,
-                photos,
-              })
+              setIsSaving(true)
 
-              setObservations((current) => [
-                {
-                  id,
+              try {
+                const id = await db.observations.add({
                   speciesName,
                   scientificName,
                   identificationStatus,
@@ -432,14 +439,34 @@ function Home() {
                   longitude: location.longitude,
                   photo: photos[0] ?? null,
                   photos,
-                },
-                ...current,
-              ])
+                })
 
-              setSaved(true)
+                setObservations((current) => [
+                  {
+                    id,
+                    speciesName,
+                    scientificName,
+                    identificationStatus,
+                    notes,
+                    observationAt,
+                    recordedAt,
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    photo: photos[0] ?? null,
+                    photos,
+                  },
+                  ...current,
+                ])
+
+                setSaved(true)
+              } catch (error) {
+                alert(`Failed to save observation: ${error instanceof Error ? error.message : 'Unknown error'}`)
+              } finally {
+                setIsSaving(false)
+              }
             }}
           >
-            Save Observation
+            {isSaving ? 'Saving observation...' : 'Save Observation'}
           </Button>
 
           {saved && (
@@ -447,12 +474,15 @@ function Home() {
               <p className="text-sm font-semibold text-emerald-800">
                 ✓ Observation saved successfully!
               </p>
+              <p className="mt-1 text-xs text-emerald-700">
+                Form is locked to prevent accidental changes.
+              </p>
               <Button
                 type="button"
                 className="mt-3 w-full"
                 onClick={resetForm}
               >
-                + Record Another Observation
+                + New Observation
               </Button>
             </div>
           )}

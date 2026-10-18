@@ -119,7 +119,6 @@ function ObservationCard({ observation }: ObservationCardProps) {
       <p>
         <strong>Recorded:</strong> {formatDateTime(observation.recordedAt)}
       </p>
-
       <p>
         <strong>Latitude:</strong> {formatCoordinate(observation.latitude)}
       </p>
